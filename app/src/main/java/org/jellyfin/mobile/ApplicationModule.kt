@@ -8,7 +8,6 @@ import org.jellyfin.apiclient.Jellyfin
 import org.jellyfin.apiclient.android
 import org.jellyfin.apiclient.interaction.AndroidDevice
 import org.jellyfin.mobile.api.TimberLogger
-import org.jellyfin.mobile.controller.ServerController
 import org.jellyfin.mobile.fragment.ConnectFragment
 import org.jellyfin.mobile.fragment.WebViewFragment
 import org.jellyfin.mobile.player.PlayerEvent
@@ -44,9 +43,6 @@ val applicationModule = module {
     single { WebappFunctionChannel() }
     single { RemoteVolumeProvider(get()) }
     single(named(PLAYER_EVENT_CHANNEL)) { Channel<PlayerEvent>() }
-
-    // Controllers
-    single { ServerController(get(), get(), get(), get()) }
 
     // ViewModels
     viewModel { MainViewModel(get(), get(), get()) }
