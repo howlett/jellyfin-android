@@ -14,6 +14,7 @@ import org.jellyfin.apiclient.interaction.ApiClient
 import org.jellyfin.apiclient.model.system.PublicSystemInfo
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.R
+import org.jellyfin.mobile.model.dto.UserInfo
 import org.jellyfin.mobile.model.sql.dao.ServerDao
 import org.jellyfin.mobile.model.sql.dao.UserDao
 import org.jellyfin.mobile.model.sql.entity.ServerEntity
@@ -23,6 +24,7 @@ import org.jellyfin.mobile.model.state.LoginState
 import org.jellyfin.mobile.utils.PRODUCT_NAME_SUPPORTED_SINCE
 import org.jellyfin.mobile.utils.authenticateUser
 import org.jellyfin.mobile.utils.getPublicSystemInfo
+import org.jellyfin.mobile.utils.getUserInfo
 
 class ServerController(
     private val appPreferences: AppPreferences,
@@ -34,6 +36,7 @@ class ServerController(
     private val scope = CoroutineScope(Dispatchers.Main)
 
     var loginState by mutableStateOf(LoginState.PENDING)
+    var userInfo by mutableStateOf<UserInfo?>(null)
 
     init {
         scope.launch {
@@ -48,6 +51,9 @@ class ServerController(
                 val (user, server) = serverUser
                 apiClient.ChangeServerLocation(server.hostname)
                 apiClient.SetAuthenticationInfo(user.accessToken, user.userId)
+                userInfo = apiClient.getUserInfo(user.userId)?.let { dto ->
+                    UserInfo(user.id, dto)
+                }
                 LoginState.LOGGED_IN
             } else {
                 LoginState.NOT_LOGGED_IN
@@ -138,9 +144,25 @@ class ServerController(
             }
             appPreferences.currentServerId = serverId
             appPreferences.currentUserId = userId
+            userInfo = UserInfo(userId, user)
             loginState = LoginState.LOGGED_IN
             return true
         }
         return false
+    }
+
+    fun tryLogout() {
+        scope.launch { logout() }
+    }
+
+    suspend fun logout() {
+        userInfo?.let { user ->
+            withContext(Dispatchers.IO) {
+                userDao.logout(user.id)
+            }
+        }
+        apiClient.ChangeServerLocation(null)
+        loginState = LoginState.NOT_LOGGED_IN
+        userInfo = null
     }
 }
