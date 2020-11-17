@@ -19,13 +19,17 @@ package org.jellyfin.mobile.ui.utils
 import androidx.compose.animation.AnimatedFloatModel
 import androidx.compose.animation.core.AnimationClockObservable
 import androidx.compose.animation.core.fling
-import androidx.compose.foundation.Box
-import androidx.compose.foundation.ContentGravity
 import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.drawWithContent
 import androidx.compose.ui.gesture.scrollorientationlocking.Orientation
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.util.lerp
 import kotlin.math.roundToInt
@@ -135,7 +139,7 @@ fun Pager(
                 val pageData = PageData(page)
                 val scope = PagerScope(state, page)
                 key(pageData) {
-                    Box(gravity = ContentGravity.Center, modifier = pageData) {
+                    Box(alignment = Alignment.Center, modifier = pageData) {
                         scope.pageContent()
                     }
                 }

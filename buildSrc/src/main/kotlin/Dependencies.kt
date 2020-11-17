@@ -26,9 +26,9 @@ object Dependencies {
         const val modernAndroidPreferences = "1.1.0-alpha5"
 
         // Compose
-        const val compose = "1.0.0-alpha06"
-        const val composeRouter = "0.21.0"
-        const val accompanistCoil = "0.3.2"
+        const val compose = "1.0.0-alpha07"
+        const val composeRouter = "0.22.0"
+        const val accompanistCoil = "0.3.3.1"
 
         // Room
         const val room = "2.2.5"

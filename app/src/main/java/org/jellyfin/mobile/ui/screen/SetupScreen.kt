@@ -4,8 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -126,17 +126,19 @@ class SetupScreen : AbstractScreen() {
             OutlinedTextField(
                 value = text,
                 onValueChange = onTextChange,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 label = {
                     Text(text = stringResource(R.string.host_input_hint))
                 },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                keyboardType = KeyboardType.Uri,
-                imeAction = ImeAction.Go,
+                isErrorValue = errorText != null,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Go,
+                ),
                 onImeActionPerformed = { _, _ ->
                     submit()
                 },
                 activeColor = MaterialTheme.colors.secondary,
-                isErrorValue = errorText != null,
             )
             AnimatedVisibility(visible = errorText != null) {
                 Text(
@@ -219,12 +221,14 @@ class SetupScreen : AbstractScreen() {
             OutlinedTextField(
                 value = username,
                 onValueChange = onUsernameChange,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 label = {
                     Text(text = stringResource(R.string.username_input_hint))
                 },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next,
+                ),
                 onImeActionPerformed = { _, _ ->
                     passwordFocusRequester.requestFocus()
                 },
@@ -233,13 +237,15 @@ class SetupScreen : AbstractScreen() {
             OutlinedTextField(
                 value = password,
                 onValueChange = onPasswordChange,
+                modifier = Modifier.focusRequester(passwordFocusRequester).fillMaxWidth().padding(bottom = 8.dp),
                 label = {
                     Text(text = stringResource(R.string.password_input_hint))
                 },
-                modifier = Modifier.focusRequester(passwordFocusRequester).fillMaxWidth().padding(bottom = 8.dp),
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done,
+                ),
                 onImeActionPerformed = { _, _ ->
                     submit()
                 },
