@@ -44,9 +44,9 @@ class LibraryScreen(private val viewInfo: UserViewInfo) : AbstractScreen() {
             currentTabState = viewModel.currentTab,
         ) { page ->
             when (page) {
-                0 -> AlbumList(viewModel = viewModel)
-                1 -> ArtistList(viewModel = viewModel)
-                2 -> SongList(viewModel = viewModel)
+                0 -> AlbumList(albums = viewModel.albums)
+                1 -> ArtistList(artists = viewModel.artists)
+                2 -> SongList(songs = viewModel.songs)
             }
         }
     }

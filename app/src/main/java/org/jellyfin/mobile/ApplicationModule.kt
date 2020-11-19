@@ -13,6 +13,7 @@ import org.jellyfin.mobile.fragment.WebViewFragment
 import org.jellyfin.mobile.player.PlayerEvent
 import org.jellyfin.mobile.player.PlayerFragment
 import org.jellyfin.mobile.utils.Constants
+import org.jellyfin.mobile.utils.ImageResolver
 import org.jellyfin.mobile.utils.PermissionRequestHelper
 import org.jellyfin.mobile.viewmodel.MainViewModel
 import org.jellyfin.mobile.webapp.RemoteVolumeProvider
@@ -39,6 +40,7 @@ val applicationModule = module {
     single {
         get<Jellyfin>().createApi(device = AndroidDevice.fromContext(androidApplication()))
     }
+    single { ImageResolver(androidApplication(), get(), get()) }
     single { PermissionRequestHelper() }
     single { WebappFunctionChannel() }
     single { RemoteVolumeProvider(get()) }

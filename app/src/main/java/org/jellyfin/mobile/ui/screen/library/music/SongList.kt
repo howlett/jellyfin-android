@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,9 +25,9 @@ import org.jellyfin.mobile.ui.utils.ApiImage
 import timber.log.Timber
 
 @Composable
-fun SongList(viewModel: MusicViewModel) {
+fun SongList(songs: SnapshotStateList<SongInfo>) {
     LazyColumnFor(
-        items = viewModel.songs,
+        items = songs,
         contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp),
     ) { song ->
         Song(songInfo = song, onClick = {
