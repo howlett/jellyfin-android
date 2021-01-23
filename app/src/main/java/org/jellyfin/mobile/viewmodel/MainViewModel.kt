@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.jellyfin.apiclient.interaction.ApiClient
+import org.jellyfin.apiclient.api.client.ApiClient
 import org.jellyfin.mobile.controller.ServerController
 import org.jellyfin.mobile.model.sql.entity.ServerEntity
 
@@ -23,8 +23,7 @@ class MainViewModel(
         viewModelScope.launch {
             serverState.collect { state ->
                 val serverAddress = state.server?.hostname?.trimEnd('/')
-                if (apiClient.serverAddress != serverAddress)
-                    apiClient.ChangeServerLocation(serverAddress)
+                apiClient.baseUrl = serverAddress
             }
         }
 

@@ -2,7 +2,7 @@ package org.jellyfin.mobile.controller
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jellyfin.apiclient.interaction.ApiClient
+import org.jellyfin.apiclient.api.client.KtorClient
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.model.sql.dao.ServerDao
 import org.jellyfin.mobile.model.sql.dao.UserDao
@@ -11,7 +11,7 @@ import org.jellyfin.mobile.model.sql.entity.ServerUser
 
 class ServerController(
     private val appPreferences: AppPreferences,
-    private val apiClient: ApiClient,
+    private val apiClient: KtorClient,
     private val serverDao: ServerDao,
     private val userDao: UserDao,
 ) {
@@ -36,7 +36,7 @@ class ServerController(
         appPreferences.currentUserId = withContext(Dispatchers.IO) {
             userDao.upsert(serverId, userId, accessToken)
         }
-        apiClient.SetAuthenticationInfo(accessToken, userId)
+        apiClient.accessToken = accessToken
     }
 
     suspend fun loadCurrentServer(): ServerEntity? = withContext(Dispatchers.IO) {

@@ -20,9 +20,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.jellyfin.apiclient.interaction.ApiClient
-import org.jellyfin.apiclient.model.session.PlaybackProgressInfo
-import org.jellyfin.apiclient.model.session.PlaybackStopInfo
 import org.jellyfin.mobile.BuildConfig
 import org.jellyfin.mobile.PLAYER_EVENT_CHANNEL
 import org.jellyfin.mobile.player.source.JellyfinMediaSource
@@ -33,7 +30,6 @@ import org.jellyfin.mobile.webapp.WebappFunctionChannel
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.qualifier.named
-import org.jellyfin.apiclient.model.session.RepeatMode as ApiRepeatMode
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application), KoinComponent, Player.EventListener {
     val apiClient: ApiClient by inject()

@@ -6,18 +6,17 @@ import android.os.Build
 import org.jellyfin.mobile.fragment.WebViewFragment
 import timber.log.Timber
 import java.util.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 suspend fun WebViewFragment.initLocale() {
-    // Try to set locale via user settings
-    val userSettings = suspendCoroutine<String> { continuation ->
-        webView.evaluateJavascript("window.localStorage.getItem('${apiClient.currentUserId}-language')") { result ->
-            continuation.resume(result)
-        }
-    }
-    if (requireContext().setLocale(userSettings.unescapeJson()))
-        return
+    //TODO apiclient does not store user id
+//    // Try to set locale via user settings
+//    val userSettings = suspendCoroutine<String> { continuation ->
+//        webView.evaluateJavascript("window.localStorage.getItem('${apiClient.currentUserId}-language')") { result ->
+//            continuation.resume(result)
+//        }
+//    }
+//    if (requireContext().setLocale(userSettings.unescapeJson()))
+//        return
 
     // Fallback to device locale
     Timber.i("Couldn't acquire locale from config, keeping current")

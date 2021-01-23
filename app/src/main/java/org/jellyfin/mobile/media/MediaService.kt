@@ -27,7 +27,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import kotlinx.coroutines.*
-import org.jellyfin.apiclient.interaction.ApiClient
+import org.jellyfin.apiclient.api.client.KtorClient
 import org.jellyfin.mobile.R
 import org.jellyfin.mobile.cast.CastPlayerProvider
 import org.jellyfin.mobile.cast.ICastPlayerProvider
@@ -42,8 +42,8 @@ import com.google.android.exoplayer2.MediaItem as ExoPlayerMediaItem
 
 class MediaService : MediaBrowserServiceCompat() {
 
-    private val apiClient: ApiClient by inject()
-    private val serverController: ServerController by inject()
+    private val apiClient by inject<KtorClient>()
+    private val serverController by inject<ServerController>()
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -93,8 +93,8 @@ class MediaService : MediaBrowserServiceCompat() {
         loadingJob = serviceScope.launch {
             serverUser = serverController.loadCurrentServerUser()
             serverUser?.let { serverUser ->
-                apiClient.ChangeServerLocation(serverUser.server.hostname.trimEnd('/'))
-                apiClient.SetAuthenticationInfo(serverUser.user.accessToken, serverUser.user.userId)
+                apiClient.baseUrl = serverUser.server.hostname
+                apiClient.accessToken = serverUser.user.accessToken
             }
         }
 
