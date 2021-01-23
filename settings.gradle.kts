@@ -1,4 +1,4 @@
-import java.util.Properties
+import java.util.*
 
 include(":app")
 
@@ -27,7 +27,7 @@ val apiclientLocation = "../jellyfin-apiclient-java"
 if (File(apiclientLocation).exists() && enableDependencySubstitution) {
     includeBuild(apiclientLocation) {
         dependencySubstitution {
-            substitute(module("org.jellyfin.apiclient:android")).with(project(":android"))
+            substitute(module("org.jellyfin.apiclient:jellyfin-platform-android")).with(project(":jellyfin-platform-android"))
         }
     }
 }
