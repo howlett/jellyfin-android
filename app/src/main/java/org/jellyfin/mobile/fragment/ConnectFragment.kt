@@ -23,14 +23,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.jellyfin.apiclient.Jellyfin
 import org.jellyfin.apiclient.api.client.KtorClient
 import org.jellyfin.apiclient.api.operations.SystemApi
 import org.jellyfin.apiclient.discovery.LocalServerDiscovery
-import org.jellyfin.apiclient.model.api.PublicSystemInfo
 import org.jellyfin.apiclient.model.discovery.DiscoveryServerInfo
+import org.jellyfin.apiclient.model.discovery.ServerVersion
 import org.jellyfin.mobile.R
 import org.jellyfin.mobile.controller.ServerController
 import org.jellyfin.mobile.databinding.FragmentConnectBinding
@@ -57,9 +55,14 @@ class ConnectFragment : Fragment() {
     private val connectButton: Button get() = connectServerBinding.connectButton
     private val chooseServerButton: Button get() = connectServerBinding.chooseServerButton
 
-    private val serverList = ArrayList<DiscoveryServerInfo>(LocalServerDiscovery.DISCOVERY_MAX_SERVERS)
+    private val serverList =
+        ArrayList<DiscoveryServerInfo>(LocalServerDiscovery.DISCOVERY_MAX_SERVERS)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _connectServerBinding = FragmentConnectBinding.inflate(inflater, container, false)
         return serverSetupLayout.apply { applyWindowInsetsAsMargins() }
     }
@@ -96,7 +99,8 @@ class ConnectFragment : Fragment() {
             hostInput.postDelayed(25) {
                 hostInput.requestFocus()
 
-                requireContext().getSystemService<InputMethodManager>()?.showSoftInput(hostInput, InputMethodManager.SHOW_IMPLICIT)
+                requireContext().getSystemService<InputMethodManager>()
+                    ?.showSoftInput(hostInput, InputMethodManager.SHOW_IMPLICIT)
             }
         }
 
@@ -117,7 +121,7 @@ class ConnectFragment : Fragment() {
             val httpUrl = checkServerUrlAndConnection(enteredUrl)
             if (httpUrl != null) {
                 clearServerList()
-                serverController.setupServer(httpUrl.toString())
+                serverController.setupServer(httpUrl)
                 mainViewModel.refreshServer()
             }
             hostInput.isEnabled = true
@@ -127,7 +131,8 @@ class ConnectFragment : Fragment() {
 
     private fun discoverServers() {
         lifecycleScope.launch {
-            jellyfin.discovery.discoverLocalServers(maxServers = LocalServerDiscovery.DISCOVERY_MAX_SERVERS).flowOn(Dispatchers.IO).collect { serverInfo ->
+            jellyfin.discovery.discoverLocalServers(maxServers = LocalServerDiscovery.DISCOVERY_MAX_SERVERS)
+                .flowOn(Dispatchers.IO).collect { serverInfo ->
                 serverList.add(serverInfo)
                 chooseServerButton.isVisible = true
             }
@@ -157,67 +162,54 @@ class ConnectFragment : Fragment() {
         connectionErrorText.isVisible = false
     }
 
-    // TODO use discovery functions to discover correct URL
-    private suspend fun checkServerUrlAndConnection(enteredUrl: String): HttpUrl? {
+    private suspend fun checkServerUrlAndConnection(enteredUrl: String): String? {
         Timber.i("checkServerUrlAndConnection $enteredUrl")
 
-        val urls = jellyfin.discovery.getAddressCandidates(enteredUrl)
-        Timber.i("Address candidates are $urls")
+        val candidates = jellyfin.discovery.getAddressCandidates(enteredUrl)
+        Timber.i("Address candidates are $candidates")
 
-        var httpUrl: HttpUrl? = null
-        var serverInfo: PublicSystemInfo? = null
-        loop@ for (url in urls) {
-            httpUrl = url.toHttpUrlOrNull()
+        val recommendedServer = jellyfin.discovery.getRecommendedServer(candidates, false)
 
-            if (httpUrl == null) {
-                showConnectionError(R.string.connection_error_invalid_format)
-                return null // Format is invalid, don't try any other variants
-            }
+        // No server found that replied
+        if (recommendedServer == null) {
+            Timber.i("No recommended server found")
 
-            // Set API client address
-            apiClient.baseUrl = httpUrl.toString()
-
-            try {
-                val response = systemApi.getPublicSystemInfo()
-                if (response.status == 200) {
-                    serverInfo = response.content
-                    break@loop
-                }
-            } catch (err: Error) {
-                // Connection issues ocurred
-            }
-        }
-
-        if (httpUrl == null || serverInfo == null) {
-            Timber.w("Failed to find server info, url was $httpUrl")
-
-            showConnectionError()
+            //TODO add candidates to error
+            showConnectionError(R.string.connection_error_cannot_connect)
             return null
         }
 
-        val version = serverInfo.version
-            ?.split('.')
-            ?.mapNotNull(String::toIntOrNull)
-            ?: emptyList()
+        val systemInfo = recommendedServer.systemInfo
+
+        // System Info is missing, shouldn't be able to happen but check just in case
+        if (systemInfo == null) {
+            Timber.w("Recommended server did not contain system information!")
+
+            showConnectionError(R.string.connection_error_invalid_version)
+            return null
+        }
+
+        val version = systemInfo.version?.let { ServerVersion.fromString(it) }
 
         val isValidInstance = when {
-            version.size != 3 -> false
+            // Incorrect format
+            version == null -> false
             // Major version is invalid
-            version[0] != Jellyfin.recommendedVersion.major -> false
+            version.major != Jellyfin.recommendedVersion.major -> false
             // Minor version is too old
-            version[1] < Jellyfin.recommendedVersion.minor -> false
+            version.minor < Jellyfin.recommendedVersion.minor -> false
             // Incorrect product name
-            serverInfo.productName != "Jellyfin Server" -> false
+            systemInfo.productName != "Jellyfin Server" -> false
             else -> true
         }
 
-        Timber.i("Server at $httpUrl with version ${serverInfo.version} valid: $isValidInstance")
+        Timber.i("Recommended server at ${recommendedServer.address} with version $version valid: $isValidInstance")
 
         if (!isValidInstance) {
             showConnectionError(R.string.connection_error_invalid_version)
             return null
         }
 
-        return httpUrl
+        return recommendedServer.address
     }
 }
