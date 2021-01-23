@@ -9,6 +9,7 @@ import org.jellyfin.apiclient.model.ClientInfo
 import org.jellyfin.mobile.controller.ServerController
 import org.jellyfin.mobile.fragment.ConnectFragment
 import org.jellyfin.mobile.fragment.WebViewFragment
+import org.jellyfin.mobile.media.car.LibraryBrowser
 import org.jellyfin.mobile.player.PlayerEvent
 import org.jellyfin.mobile.player.PlayerFragment
 import org.jellyfin.mobile.utils.Constants
@@ -53,4 +54,7 @@ val applicationModule = module {
     fragment { ConnectFragment() }
     fragment { WebViewFragment() }
     fragment { PlayerFragment() }
+
+    // Media
+    factory { LibraryBrowser(get(), get(), get(), get(), get(), get(), get(), get())  }
 }

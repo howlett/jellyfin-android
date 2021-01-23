@@ -20,6 +20,9 @@ import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jellyfin.apiclient.api.operations.ImageApi
+import org.jellyfin.apiclient.model.api.ImageFormat
+import org.jellyfin.apiclient.model.api.ImageType
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.BuildConfig
 import org.jellyfin.mobile.MainActivity
@@ -29,6 +32,7 @@ import org.jellyfin.mobile.utils.Constants.VIDEO_PLAYER_NOTIFICATION_ID
 import org.jellyfin.mobile.utils.createMediaNotificationChannel
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PlayerNotificationHelper(private val viewModel: PlayerViewModel) : KoinComponent {
@@ -37,6 +41,7 @@ class PlayerNotificationHelper(private val viewModel: PlayerViewModel) : KoinCom
     private val notificationManager: NotificationManager? by lazy { context.getSystemService() }
     private val imageLoader: ImageLoader by inject()
     private val receiverRegistered = AtomicBoolean(false)
+    private val imageApi by inject<ImageApi>()
 
     val shouldShowNotification: Boolean
         get() = appPreferences.exoPlayerAllowBackgroundAudio
@@ -55,12 +60,16 @@ class PlayerNotificationHelper(private val viewModel: PlayerViewModel) : KoinCom
 
         viewModel.viewModelScope.launch {
             val mediaIcon: Bitmap? = withContext(Dispatchers.IO) {
-                val imageUrl = viewModel.apiClient.GetImageUrl(mediaSource.id, ImageOptions().apply {
-                    imageType = Primary
-                    val size = context.resources.getDimensionPixelSize(R.dimen.media_notification_height)
-                    maxWidth = size
-                    maxHeight = size
-                })
+                val size = context.resources.getDimensionPixelSize(R.dimen.media_notification_height)
+
+                // FIXME format is optional in RC3 and should be removed then
+                val imageUrl = imageApi.getItemImageUrl(
+                    itemId = UUID.fromString(mediaSource.id),
+                    imageType = ImageType.PRIMARY,
+                    maxWidth = size,
+                    maxHeight = size,
+                    format = ImageFormat.WEBP
+                )
                 imageLoader.execute(ImageRequest.Builder(context).data(imageUrl).build()).drawable?.toBitmap()
             }
 

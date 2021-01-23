@@ -51,7 +51,7 @@ class MediaService : MediaBrowserServiceCompat() {
 
     private lateinit var loadingJob: Job
     private var serverUser: ServerUser? = null
-    private val libraryBrowser = LibraryBrowser(this, apiClient)
+    private val libraryBrowser by inject<LibraryBrowser>()
 
     // The current player will either be an ExoPlayer (for local playback) or a CastPlayer (for
     // remote playback through a Cast device).

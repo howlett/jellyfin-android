@@ -20,6 +20,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.jellyfin.apiclient.api.operations.PlaystateApi
+import org.jellyfin.apiclient.model.api.PlaybackProgressInfo
+import org.jellyfin.apiclient.model.api.PlaybackStopInfo
+import org.jellyfin.apiclient.model.api.RepeatMode
 import org.jellyfin.mobile.BuildConfig
 import org.jellyfin.mobile.PLAYER_EVENT_CHANNEL
 import org.jellyfin.mobile.player.source.JellyfinMediaSource
@@ -30,9 +34,10 @@ import org.jellyfin.mobile.webapp.WebappFunctionChannel
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.qualifier.named
+import java.util.*
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application), KoinComponent, Player.EventListener {
-    val apiClient: ApiClient by inject()
+    private val playstateApi by inject<PlaystateApi>()
     val mediaSourceManager = MediaSourceManager(this)
     private val audioManager: AudioManager by lazy { getApplication<Application>().getSystemService()!! }
     val notificationHelper: PlayerNotificationHelper by lazy { PlayerNotificationHelper(this) }
@@ -124,16 +129,20 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 // Report playback stop via API
                 withTimeoutOrNull(200) {
                     val (playbackState, currentPosition) = playerState
-                    apiClient.reportPlaybackStopped(PlaybackStopInfo().apply {
-                        itemId = mediaSource.id
+                    playstateApi.reportPlaybackStopped(PlaybackStopInfo(
+                        itemId = UUID.fromString(mediaSource.id),
                         positionTicks = when (playbackState) {
                             Player.STATE_ENDED -> mediaSource.mediaDurationTicks
                             else -> currentPosition * Constants.TICKS_PER_MILLISECOND
-                        }
-                    })
+                        },
+                        failed = false
+                    ))
                     if (playbackState == Player.STATE_ENDED) {
                         // Mark video as watched
-                        apiClient.markPlayed(mediaSource.id, apiClient.currentUserId)
+                        playstateApi.markPlayedItem(
+                            userId = UUID.randomUUID(), // FIXME Get userid
+                            itemId = UUID.fromString(mediaSource.id)
+                        )
                     }
                 }
             }
@@ -169,18 +178,19 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
         val playbackPositionMillis = player.currentPosition
         if (player.playbackState != Player.STATE_ENDED) {
             webappFunctionChannel.exoPlayerUpdateProgress(playbackPositionMillis)
-            apiClient.reportPlaybackProgress(PlaybackProgressInfo().apply {
-                itemId = mediaSource.id
-                canSeek = true
-                isPaused = !player.isPlaying
-                isMuted = false
-                positionTicks = playbackPositionMillis * Constants.TICKS_PER_MILLISECOND
-                val stream = AudioManager.STREAM_MUSIC
-                val volumeRange = audioManager.getVolumeRange(stream)
-                val currentVolume = audioManager.getStreamVolume(stream)
-                volumeLevel = (currentVolume - volumeRange.first) * 100 / volumeRange.width
-                repeatMode = ApiRepeatMode.RepeatNone
-            })
+
+            val stream = AudioManager.STREAM_MUSIC
+            val volumeRange = audioManager.getVolumeRange(stream)
+            val currentVolume = audioManager.getStreamVolume(stream)
+            playstateApi.reportPlaybackProgress(PlaybackProgressInfo(
+                itemId = UUID.fromString(mediaSource.id),
+                canSeek = true,
+                isPaused = !player.isPlaying,
+                isMuted = false,
+                positionTicks = playbackPositionMillis * Constants.TICKS_PER_MILLISECOND,
+                volumeLevel = (currentVolume - volumeRange.first) * 100 / volumeRange.width,
+                repeatMode = RepeatMode.REPEAT_NONE
+            ))
         }
     }
 
