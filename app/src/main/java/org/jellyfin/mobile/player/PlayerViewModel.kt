@@ -20,7 +20,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.jellyfin.apiclient.api.operations.PlaystateApi
+import org.jellyfin.apiclient.api.operations.PlayStateApi
 import org.jellyfin.apiclient.model.api.PlaybackProgressInfo
 import org.jellyfin.apiclient.model.api.PlaybackStopInfo
 import org.jellyfin.apiclient.model.api.RepeatMode
@@ -37,7 +37,7 @@ import org.koin.core.qualifier.named
 import java.util.*
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application), KoinComponent, Player.EventListener {
-    private val playstateApi by inject<PlaystateApi>()
+    private val playStateApi by inject<PlayStateApi>()
     val mediaSourceManager = MediaSourceManager(this)
     private val audioManager: AudioManager by lazy { getApplication<Application>().getSystemService()!! }
     val notificationHelper: PlayerNotificationHelper by lazy { PlayerNotificationHelper(this) }
@@ -129,7 +129,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 // Report playback stop via API
                 withTimeoutOrNull(200) {
                     val (playbackState, currentPosition) = playerState
-                    playstateApi.reportPlaybackStopped(PlaybackStopInfo(
+                    playStateApi.reportPlaybackStopped(PlaybackStopInfo(
                         itemId = UUID.fromString(mediaSource.id),
                         positionTicks = when (playbackState) {
                             Player.STATE_ENDED -> mediaSource.mediaDurationTicks
@@ -139,7 +139,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                     ))
                     if (playbackState == Player.STATE_ENDED) {
                         // Mark video as watched
-                        playstateApi.markPlayedItem(
+                        playStateApi.markPlayedItem(
                             userId = UUID.randomUUID(), // FIXME Get userid
                             itemId = UUID.fromString(mediaSource.id)
                         )
@@ -182,7 +182,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
             val stream = AudioManager.STREAM_MUSIC
             val volumeRange = audioManager.getVolumeRange(stream)
             val currentVolume = audioManager.getStreamVolume(stream)
-            playstateApi.reportPlaybackProgress(PlaybackProgressInfo(
+            playStateApi.reportPlaybackProgress(PlaybackProgressInfo(
                 itemId = UUID.fromString(mediaSource.id),
                 canSeek = true,
                 isPaused = !player.isPlaying,

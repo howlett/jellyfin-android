@@ -20,7 +20,7 @@ val apiModule = module {
     // Add API modules
     single { SystemApi(get()) }
     single { ImageApi(get()) }
-    single { PlaystateApi(get()) } // Rename to PlayStateApi plz
+    single { PlayStateApi(get()) }
     single { ItemsApi(get()) }
     single { UserViewsApi(get()) }
     single { ArtistsApi(get()) }

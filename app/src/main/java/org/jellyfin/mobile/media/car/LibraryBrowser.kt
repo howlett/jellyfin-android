@@ -30,13 +30,14 @@ import java.util.*
 
 class LibraryBrowser(
     private val context: Context,
+    private val deviceInfo: DeviceInfo,
     private val itemsApi: ItemsApi,
     private val userViewsApi: UserViewsApi,
     private val artistsApi: ArtistsApi,
     private val genresApi: GenresApi,
     private val playlistsApi: PlaylistsApi,
     private val imageApi: ImageApi,
-    private val universalAudioApi: UniversalAudioApi
+    private val universalAudioApi: UniversalAudioApi,
 ) {
     fun getRoot(hints: Bundle?): MediaBrowserServiceCompat.BrowserRoot {
         /**
@@ -64,8 +65,8 @@ class LibraryBrowser(
             return null
 
         val type = split[0]
-        val libraryId = split.getOrNull(1)
-        val itemId = split.getOrNull(2)
+        val libraryId = split.getOrNull(1)?.let(UUID::fromString)
+        val itemId = split.getOrNull(2)?.let(UUID::fromString)
 
         return when {
             libraryId != null -> {
@@ -100,7 +101,8 @@ class LibraryBrowser(
         if (split.size != 3)
             return null
 
-        val (type, collectionId, _) = split
+        val type = split[0]
+        val collectionId = split[1].let(UUID::fromString)
 
         val playQueue = when (type) {
             LibraryPage.RECENTS -> getRecents(collectionId)
@@ -138,7 +140,7 @@ class LibraryBrowser(
                 }?.let { artistId ->
                     itemsApi.getItems(
                         userId = UUID.randomUUID(), // FIXME Get userid
-                        artistIds = listOf(UUID.fromString(artistId)),
+                        artistIds = listOf(artistId),
                         includeItemTypes = listOf("Audio"),
                         sortBy = "Random",
                         recursive = true,
@@ -172,7 +174,7 @@ class LibraryBrowser(
     /**
      * Find a single specific item for the given [searchQuery] with a specific [type]
      */
-    private suspend fun searchItems(searchQuery: String, type: String): String? {
+    private suspend fun searchItems(searchQuery: String, type: String): UUID? {
         val result by itemsApi.getItems(
             userId = UUID.randomUUID(), // FIXME Get userid
             searchTerm = searchQuery,
@@ -183,12 +185,11 @@ class LibraryBrowser(
             limit = 1
         )
 
-        // TODO return uuid instead of string?
-        return result.items?.firstOrNull()?.id?.toString()
+        return result.items?.firstOrNull()?.id
     }
 
     suspend fun getDefaultRecents(): List<MediaMetadataCompat>? =
-        getLibraries().firstOrNull()?.mediaId?.let { defaultLibrary -> getRecents(defaultLibrary) }
+        getLibraries().firstOrNull()?.mediaId?.let { defaultLibrary -> getRecents(defaultLibrary.let(UUID::fromString)) }
 
     private suspend fun getLibraries(): List<MediaBrowserCompat.MediaItem> {
         val userViews by userViewsApi.getUserViews(
@@ -203,7 +204,7 @@ class LibraryBrowser(
                     imageType = ImageType.PRIMARY,
                     maxWidth = 1080,
                     quality = 90,
-                    format = ImageFormat.WEBP // FIXME format is optional in RC3 and should be removed then
+                    format = ImageFormat.WEBP // FIXME Remove when parameter becomes nullable
                 )
 
                 val description = MediaDescriptionCompat.Builder().apply {
@@ -216,7 +217,7 @@ class LibraryBrowser(
             .toList()
     }
 
-    private fun getLibraryViews(context: Context, libraryId: String): List<MediaBrowserCompat.MediaItem> {
+    private fun getLibraryViews(context: Context, libraryId: UUID): List<MediaBrowserCompat.MediaItem> {
         val libraryViews = arrayOf(
             LibraryPage.RECENTS to R.string.media_service_car_section_recents,
             LibraryPage.ALBUMS to R.string.media_service_car_section_albums,
@@ -240,10 +241,10 @@ class LibraryBrowser(
         }
     }
 
-    private suspend fun getRecents(libraryId: String): List<MediaMetadataCompat>? {
+    private suspend fun getRecents(libraryId: UUID): List<MediaMetadataCompat>? {
         val result by itemsApi.getItems(
             userId = UUID.randomUUID(), // FIXME Get userid
-            parentId = UUID.fromString(libraryId), // TODO accept UUID as parameter?
+            parentId = libraryId,
             includeItemTypes = listOf("Audio"),
             filters = listOf(ItemFilter.IS_PLAYED),
             sortBy = "DatePlayed",
@@ -259,15 +260,15 @@ class LibraryBrowser(
     }
 
     private suspend fun getAlbums(
-        libraryId: String,
-        filterArtist: String? = null,
-        filterGenre: String? = null
+        libraryId: UUID,
+        filterArtist: UUID? = null,
+        filterGenre: UUID? = null
     ): List<MediaBrowserCompat.MediaItem>? {
         val result by itemsApi.getItems(
             userId = UUID.randomUUID(), // FIXME Get userid
-            parentId = UUID.fromString(libraryId), // TODO accept UUID as parameter?
-            artistIds = filterArtist?.let { listOf(UUID.fromString(it)) }, // TODO accept UUID as parameter?
-            genreIds = filterGenre?.let { listOf(UUID.fromString(it)) }, // TODO accept UUID as parameter?
+            parentId = libraryId,
+            artistIds = filterArtist?.let(::listOf),
+            genreIds = filterGenre?.let(::listOf),
             includeItemTypes = listOf("MusicAlbum"),
             sortBy = "DatePlayed",
             sortOrder = "Descending",
@@ -280,10 +281,10 @@ class LibraryBrowser(
         return result.extractItems()?.browsable()
     }
 
-    private suspend fun getArtists(libraryId: String): List<MediaBrowserCompat.MediaItem>? {
+    private suspend fun getArtists(libraryId: UUID): List<MediaBrowserCompat.MediaItem>? {
         val result by artistsApi.getArtists(
             userId = UUID.randomUUID(), // FIXME Get userid
-            parentId = UUID.fromString(libraryId), // TODO accept UUID as parameter?
+            parentId = libraryId,
             // FIXME missing: sortBy = arrayOf(ItemSortBy.SortName)
             // FIXME missing: sortOrder = SortOrder.Ascending
             // FIXME missing: recursive = true
@@ -292,13 +293,13 @@ class LibraryBrowser(
             limit = 100
         )
 
-        return result.extractItems(libraryId)?.browsable()
+        return result.extractItems(libraryId.toString())?.browsable()
     }
 
-    private suspend fun getGenres(libraryId: String): List<MediaBrowserCompat.MediaItem>? {
+    private suspend fun getGenres(libraryId: UUID): List<MediaBrowserCompat.MediaItem>? {
         val result by genresApi.getGenres(
             userId = UUID.randomUUID(), // FIXME Get userid
-            parentId = UUID.fromString(libraryId), // TODO accept UUID as parameter?
+            parentId = libraryId,
             // FIXME missing: sortBy = arrayOf(ItemSortBy.SortName)
             // FIXME missing: sortOrder = SortOrder.Ascending
             // FIXME missing: recursive = true
@@ -307,13 +308,13 @@ class LibraryBrowser(
             limit = 100
         )
 
-        return result.extractItems(libraryId)?.browsable()
+        return result.extractItems(libraryId.toString())?.browsable()
     }
 
-    private suspend fun getPlaylists(libraryId: String): List<MediaBrowserCompat.MediaItem>? {
+    private suspend fun getPlaylists(libraryId: UUID): List<MediaBrowserCompat.MediaItem>? {
         val result by itemsApi.getItems(
             userId = UUID.randomUUID(), // FIXME Get userid
-            parentId = UUID.fromString(libraryId), // TODO accept UUID as parameter?
+            parentId = libraryId,
             includeItemTypes = listOf("Playlist"),
             sortBy = "DatePlayed",
             sortOrder = "Descending",
@@ -326,19 +327,19 @@ class LibraryBrowser(
         return result.extractItems()?.browsable()
     }
 
-    private suspend fun getAlbum(albumId: String): List<MediaMetadataCompat>? {
+    private suspend fun getAlbum(albumId: UUID): List<MediaMetadataCompat>? {
         val result by itemsApi.getItems(
             userId = UUID.randomUUID(), // FIXME Get userid
-            parentId = UUID.fromString(albumId), // TODO accept UUID as parameter?
+            parentId = albumId,
             sortBy = "SortName"
         )
 
         return result.extractItems("${LibraryPage.ALBUM}|$albumId")
     }
 
-    private suspend fun getPlaylist(playlistId: String): List<MediaMetadataCompat>? {
+    private suspend fun getPlaylist(playlistId: UUID): List<MediaMetadataCompat>? {
         val result by playlistsApi.getPlaylistItems(
-            playlistId = UUID.fromString(playlistId), // TODO accept UUID as parameter?
+            playlistId = playlistId,
             userId = UUID.randomUUID() // FIXME Get userid
         )
 
@@ -366,7 +367,7 @@ class LibraryBrowser(
                 maxWidth = 1080,
                 quality = 90,
                 tag = if (isAlbum) item.albumPrimaryImageTag else item.imageTags[ImageType.PRIMARY],
-                format = ImageFormat.WEBP // FIXME format is optional in RC3 and should be removed then
+                format = ImageFormat.WEBP // FIXME Remove when parameter becomes nullable
             )
         }
 
@@ -374,9 +375,20 @@ class LibraryBrowser(
             val uri = universalAudioApi.getUniversalAudioStreamUrl(
                 itemId = item.id,
                 userId = UUID.randomUUID(), // FIXME Get userid
-                deviceId = "", // FIXME HELP
+                deviceId = deviceInfo.id,
                 maxStreamingBitrate = 140000000,
-                container = listOf("opus,mp3|mp3,aac,m4a,m4b|aac,flac,webma,webm,wav,ogg"), // TODO split into list
+                container = listOf(
+                    "opus",
+                    "mp3|mp3",
+                    "aac",
+                    "m4a",
+                    "m4b|aac",
+                    "flac",
+                    "webma",
+                    "webm",
+                    "wav",
+                    "ogg"
+                ),
                 transcodingContainer = "ts",
                 transcodingProtocol = "hls",
                 audioCodec = "aac",

@@ -62,13 +62,12 @@ class PlayerNotificationHelper(private val viewModel: PlayerViewModel) : KoinCom
             val mediaIcon: Bitmap? = withContext(Dispatchers.IO) {
                 val size = context.resources.getDimensionPixelSize(R.dimen.media_notification_height)
 
-                // FIXME format is optional in RC3 and should be removed then
                 val imageUrl = imageApi.getItemImageUrl(
                     itemId = UUID.fromString(mediaSource.id),
                     imageType = ImageType.PRIMARY,
                     maxWidth = size,
                     maxHeight = size,
-                    format = ImageFormat.WEBP
+                    format = ImageFormat.WEBP // FIXME Remove when parameter becomes nullable
                 )
                 imageLoader.execute(ImageRequest.Builder(context).data(imageUrl).build()).drawable?.toBitmap()
             }

@@ -56,5 +56,5 @@ val applicationModule = module {
     fragment { PlayerFragment() }
 
     // Media
-    factory { LibraryBrowser(get(), get(), get(), get(), get(), get(), get(), get())  }
+    factory { LibraryBrowser(get(), get(), get(), get(), get(), get(), get(), get(), get())  }
 }
