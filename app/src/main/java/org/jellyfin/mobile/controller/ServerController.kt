@@ -8,6 +8,7 @@ import org.jellyfin.mobile.model.sql.dao.ServerDao
 import org.jellyfin.mobile.model.sql.dao.UserDao
 import org.jellyfin.mobile.model.sql.entity.ServerEntity
 import org.jellyfin.mobile.model.sql.entity.ServerUser
+import java.util.*
 
 class ServerController(
     private val appPreferences: AppPreferences,
@@ -36,6 +37,7 @@ class ServerController(
         appPreferences.currentUserId = withContext(Dispatchers.IO) {
             userDao.upsert(serverId, userId, accessToken)
         }
+        appPreferences.currentUserUuid = UUID.fromString(userId.replace("^([a-z\\d]{8})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{12})\$".toRegex(), "$1-$2-$3-$4-$5")) // TODO Use UUIDSerializer
         apiClient.accessToken = accessToken
     }
 

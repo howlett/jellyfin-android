@@ -21,6 +21,7 @@ object Constants {
     // Preference keys
     const val PREF_SERVER_ID = "pref_server_id"
     const val PREF_USER_ID = "pref_user_id"
+    const val PREF_USER_UUID = "pref_user_uuid"
     const val PREF_INSTANCE_URL = "pref_instance_url"
     const val PREF_IGNORE_BATTERY_OPTIMIZATIONS = "pref_ignore_battery_optimizations"
     const val PREF_DOWNLOAD_METHOD = "pref_download_method"

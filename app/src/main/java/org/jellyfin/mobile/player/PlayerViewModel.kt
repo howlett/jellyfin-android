@@ -24,6 +24,7 @@ import org.jellyfin.apiclient.api.operations.PlayStateApi
 import org.jellyfin.apiclient.model.api.PlaybackProgressInfo
 import org.jellyfin.apiclient.model.api.PlaybackStopInfo
 import org.jellyfin.apiclient.model.api.RepeatMode
+import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.BuildConfig
 import org.jellyfin.mobile.PLAYER_EVENT_CHANNEL
 import org.jellyfin.mobile.player.source.JellyfinMediaSource
@@ -37,6 +38,7 @@ import org.koin.core.qualifier.named
 import java.util.*
 
 class PlayerViewModel(application: Application) : AndroidViewModel(application), KoinComponent, Player.EventListener {
+    private val appPreferences by inject<AppPreferences>()
     private val playStateApi by inject<PlayStateApi>()
     val mediaSourceManager = MediaSourceManager(this)
     private val audioManager: AudioManager by lazy { getApplication<Application>().getSystemService()!! }
@@ -130,7 +132,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 withTimeoutOrNull(200) {
                     val (playbackState, currentPosition) = playerState
                     playStateApi.reportPlaybackStopped(PlaybackStopInfo(
-                        itemId = UUID.fromString(mediaSource.id),
+                        itemId = UUID.fromString(mediaSource.id.replace("^([a-z\\d]{8})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{12})\$".toRegex(), "$1-$2-$3-$4-$5")), // TODO Use UUIDSerializer,
                         positionTicks = when (playbackState) {
                             Player.STATE_ENDED -> mediaSource.mediaDurationTicks
                             else -> currentPosition * Constants.TICKS_PER_MILLISECOND
@@ -140,8 +142,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                     if (playbackState == Player.STATE_ENDED) {
                         // Mark video as watched
                         playStateApi.markPlayedItem(
-                            userId = UUID.randomUUID(), // FIXME Get userid
-                            itemId = UUID.fromString(mediaSource.id)
+                            userId = appPreferences.currentUserUuid!!,
+                            itemId = UUID.fromString(mediaSource.id.replace("^([a-z\\d]{8})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{12})\$".toRegex(), "$1-$2-$3-$4-$5")) // TODO Use UUIDSerializer
                         )
                     }
                 }
@@ -183,7 +185,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
             val volumeRange = audioManager.getVolumeRange(stream)
             val currentVolume = audioManager.getStreamVolume(stream)
             playStateApi.reportPlaybackProgress(PlaybackProgressInfo(
-                itemId = UUID.fromString(mediaSource.id),
+                itemId = UUID.fromString(mediaSource.id.replace("^([a-z\\d]{8})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{4})([a-z\\d]{12})\$".toRegex(), "$1-$2-$3-$4-$5")), // TODO Use UUIDSerializer
                 canSeek = true,
                 isPaused = !player.isPlaying,
                 isMuted = false,
