@@ -7,6 +7,7 @@ import androidx.core.content.edit
 import org.jellyfin.mobile.settings.ExternalPlayerPackage
 import org.jellyfin.mobile.settings.VideoPlayerType
 import org.jellyfin.mobile.utils.Constants
+import java.io.File
 import java.util.*
 
 class AppPreferences(context: Context) {

@@ -15,16 +15,10 @@ import org.jellyfin.apiclient.model.api.*
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.R
 import org.jellyfin.mobile.media.*
-import org.jellyfin.mobile.media.MediaService
-import org.jellyfin.mobile.media.mediaId
 import org.jellyfin.mobile.media.setAlbum
 import org.jellyfin.mobile.media.setAlbumArtUri
 import org.jellyfin.mobile.media.setAlbumArtist
-import org.jellyfin.mobile.media.setArtist
 import org.jellyfin.mobile.media.setDisplayIconUri
-import org.jellyfin.mobile.media.setMediaId
-import org.jellyfin.mobile.media.setMediaUri
-import org.jellyfin.mobile.media.setTitle
 import org.jellyfin.mobile.media.setTrackNumber
 import timber.log.Timber
 import java.util.*
@@ -348,7 +342,7 @@ class LibraryBrowser(
         return result.extractItems("${LibraryPage.PLAYLIST}|$playlistId")
     }
 
-    private fun BaseItemDtoQueryResult.extractItems(libraryId: String? = null): List<MediaMetadataCompat> =
+    private fun BaseItemDtoQueryResult.extractItems(libraryId: String? = null): List<MediaMetadataCompat>? =
         items?.map { item -> buildMediaMetadata(item, libraryId) }?.toList()
 
     private fun buildMediaMetadata(item: BaseItemDto, libraryId: String?): MediaMetadataCompat {
