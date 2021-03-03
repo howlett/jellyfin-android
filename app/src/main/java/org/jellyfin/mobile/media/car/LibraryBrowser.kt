@@ -138,7 +138,7 @@ class LibraryBrowser(
                         userId = appPreferences.currentUserUuid,
                         artistIds = listOf(artistId),
                         includeItemTypes = listOf("Audio"),
-                        sortBy = "Random",
+                        sortBy = listOf("Random"),
                         recursive = true,
                         imageTypeLimit = 1,
                         enableImageTypes = listOf(ImageType.PRIMARY),
@@ -243,8 +243,8 @@ class LibraryBrowser(
             parentId = libraryId,
             includeItemTypes = listOf("Audio"),
             filters = listOf(ItemFilter.IS_PLAYED),
-            sortBy = "DatePlayed",
-            sortOrder = "Descending",
+            sortBy = listOf("DatePlayed"),
+            sortOrder = listOf(SortOrder.DESCENDING),
             recursive = true,
             imageTypeLimit = 1,
             enableImageTypes = listOf(ImageType.PRIMARY),
@@ -266,8 +266,8 @@ class LibraryBrowser(
             artistIds = filterArtist?.let(::listOf),
             genreIds = filterGenre?.let(::listOf),
             includeItemTypes = listOf("MusicAlbum"),
-            sortBy = "DatePlayed",
-            sortOrder = "Descending",
+            sortBy = listOf("DatePlayed"),
+            sortOrder = listOf(SortOrder.DESCENDING),
             recursive = true,
             imageTypeLimit = 1,
             enableImageTypes = listOf(ImageType.PRIMARY),
@@ -312,8 +312,8 @@ class LibraryBrowser(
             userId = appPreferences.currentUserUuid,
             parentId = libraryId,
             includeItemTypes = listOf("Playlist"),
-            sortBy = "DatePlayed",
-            sortOrder = "Descending",
+            sortBy = listOf("DatePlayed"),
+            sortOrder = listOf(SortOrder.DESCENDING),
             recursive = true,
             imageTypeLimit = 1,
             enableImageTypes = listOf(ImageType.PRIMARY),
@@ -327,7 +327,7 @@ class LibraryBrowser(
         val result by itemsApi.getItems(
             userId = appPreferences.currentUserUuid,
             parentId = albumId,
-            sortBy = "SortName"
+            sortBy = listOf("SortName")
         )
 
         return result.extractItems("${LibraryPage.ALBUM}|$albumId")

@@ -14,13 +14,10 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.analytics.AnalyticsCollector
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.util.Clock
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import org.jellyfin.apiclient.api.operations.PlayStateApi
+import org.jellyfin.apiclient.model.api.PlayMethod
 import org.jellyfin.apiclient.model.api.PlaybackProgressInfo
 import org.jellyfin.apiclient.model.api.PlaybackStopInfo
 import org.jellyfin.apiclient.model.api.RepeatMode
@@ -191,7 +188,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 isMuted = false,
                 positionTicks = playbackPositionMillis * Constants.TICKS_PER_MILLISECOND,
                 volumeLevel = (currentVolume - volumeRange.first) * 100 / volumeRange.width,
-                repeatMode = RepeatMode.REPEAT_NONE
+                repeatMode = RepeatMode.REPEAT_NONE,
+                playMethod = PlayMethod.DIRECT_PLAY, // TODO new parameter
             ))
         }
     }
