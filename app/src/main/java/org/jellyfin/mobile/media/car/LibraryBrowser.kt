@@ -199,8 +199,7 @@ class LibraryBrowser(
                     itemId = item.id,
                     imageType = ImageType.PRIMARY,
                     maxWidth = 1080,
-                    quality = 90,
-                    format = ImageFormat.WEBP // FIXME Remove when parameter becomes nullable
+                    quality = 90
                 )
 
                 val description = MediaDescriptionCompat.Builder().apply {
@@ -362,8 +361,7 @@ class LibraryBrowser(
                 imageType = ImageType.PRIMARY,
                 maxWidth = 1080,
                 quality = 90,
-                tag = if (isAlbum) item.albumPrimaryImageTag else item.imageTags[ImageType.PRIMARY],
-                format = ImageFormat.WEBP // FIXME Remove when parameter becomes nullable
+                tag = if (isAlbum) item.albumPrimaryImageTag else item.imageTags[ImageType.PRIMARY]
             )
         }
 

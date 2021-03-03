@@ -21,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jellyfin.apiclient.api.operations.ImageApi
-import org.jellyfin.apiclient.model.api.ImageFormat
 import org.jellyfin.apiclient.model.api.ImageType
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.BuildConfig
@@ -67,7 +66,6 @@ class PlayerNotificationHelper(private val viewModel: PlayerViewModel) : KoinCom
                     imageType = ImageType.PRIMARY,
                     maxWidth = size,
                     maxHeight = size,
-                    format = ImageFormat.WEBP // FIXME Remove when parameter becomes nullable
                 )
                 imageLoader.execute(ImageRequest.Builder(context).data(imageUrl).build()).drawable?.toBitmap()
             }
