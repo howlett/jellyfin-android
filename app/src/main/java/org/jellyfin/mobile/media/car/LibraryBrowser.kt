@@ -190,17 +190,15 @@ class LibraryBrowser(
 
     private suspend fun getLibraries(): List<MediaBrowserCompat.MediaItem> {
         val userViews by userViewsApi.getUserViews(
-            userId = appPreferences.currentUserUuid!!
+            userId = appPreferences.currentUserUuid ?: return emptyList()
         )
 
-        return userViews.items.orEmpty().asSequence()
-            .filter { item -> item.collectionType == "Music" }
+        return userViews.items.orEmpty()
+            .filter { item -> item.collectionType.equals("music", ignoreCase = true) }
             .map { item ->
                 val itemImageUrl = imageApi.getItemImageUrl(
                     itemId = item.id,
-                    imageType = ImageType.PRIMARY,
-                    maxWidth = 1080,
-                    quality = 90
+                    imageType = ImageType.PRIMARY
                 )
 
                 val description = MediaDescriptionCompat.Builder().apply {
@@ -336,7 +334,7 @@ class LibraryBrowser(
     private suspend fun getPlaylist(playlistId: UUID): List<MediaMetadataCompat>? {
         val result by playlistsApi.getPlaylistItems(
             playlistId = playlistId,
-            userId = appPreferences.currentUserUuid!!
+            userId = appPreferences.currentUserUuid ?: return null
         )
 
         return result.extractItems("${LibraryPage.PLAYLIST}|$playlistId")
@@ -360,13 +358,11 @@ class LibraryBrowser(
             imageApi.getItemImageUrl(
                 itemId = itemId,
                 imageType = ImageType.PRIMARY,
-                maxWidth = 1080,
-                quality = 90,
                 tag = if (isAlbum) item.albumPrimaryImageTag else item.imageTags[ImageType.PRIMARY]
             )
         }
 
-        if (item.type == "Audio") {
+        if (item.type.equals("audio", ignoreCase = true)) {
             val uri = universalAudioApi.getUniversalAudioStreamUrl(
                 itemId = item.id,
                 userId = appPreferences.currentUserUuid,

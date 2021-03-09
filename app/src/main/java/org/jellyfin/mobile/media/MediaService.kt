@@ -91,10 +91,14 @@ class MediaService : MediaBrowserServiceCompat() {
         super.onCreate()
 
         loadingJob = serviceScope.launch {
-            serverUser = serverController.loadCurrentServerUser()
-            serverUser?.let { serverUser ->
-                apiClient.baseUrl = serverUser.server.hostname
-                apiClient.accessToken = serverUser.user.accessToken
+            try {
+                serverUser = serverController.loadCurrentServerUser()
+                serverUser?.let { serverUser ->
+                    apiClient.baseUrl = serverUser.server.hostname
+                    apiClient.accessToken = serverUser.user.accessToken
+                }
+            } catch (err: Exception) {
+                Timber.e(err)
             }
         }
 
@@ -168,10 +172,15 @@ class MediaService : MediaBrowserServiceCompat() {
         result.detach()
 
         serviceScope.launch(Dispatchers.IO) {
-            // Ensure credentials were loaded already
-            loadingJob.join()
-            val library = if (serverUser != null) libraryBrowser.loadLibrary(parentId) else null
-            result.sendResult(library ?: emptyList())
+            try {
+                // Ensure credentials were loaded already
+                loadingJob.join()
+                val library = if (serverUser != null) libraryBrowser.loadLibrary(parentId) else null
+                result.sendResult(library ?: emptyList())
+
+            } catch (err: Exception) {
+                Timber.e(err)
+            }
         }
     }
 
@@ -269,10 +278,14 @@ class MediaService : MediaBrowserServiceCompat() {
 
         override fun onPrepare(playWhenReady: Boolean) {
             serviceScope.launch {
-                val recents = libraryBrowser.getDefaultRecents()
-                if (recents != null) {
-                    preparePlaylist(recents, 0, playWhenReady)
-                } else setPlaybackError()
+                try {
+                    val recents = libraryBrowser.getDefaultRecents()
+                    if (recents != null) {
+                        preparePlaylist(recents, 0, playWhenReady)
+                    } else setPlaybackError()
+                } catch (err: Exception) {
+                    Timber.e(err)
+                }
             }
         }
 
@@ -281,11 +294,15 @@ class MediaService : MediaBrowserServiceCompat() {
                 // Recents requested
                 onPrepare(playWhenReady)
             } else serviceScope.launch {
-                val result = libraryBrowser.buildPlayQueue(mediaId)
-                if (result != null) {
-                    val (playbackQueue, initialPlaybackIndex) = result
-                    preparePlaylist(playbackQueue, initialPlaybackIndex, playWhenReady)
-                } else setPlaybackError()
+                try {
+                    val result = libraryBrowser.buildPlayQueue(mediaId)
+                    if (result != null) {
+                        val (playbackQueue, initialPlaybackIndex) = result
+                        preparePlaylist(playbackQueue, initialPlaybackIndex, playWhenReady)
+                    } else setPlaybackError()
+                } catch (err: Exception) {
+                    Timber.e(err)
+                }
             }
         }
 
@@ -294,10 +311,14 @@ class MediaService : MediaBrowserServiceCompat() {
                 // No search provided, fallback to recents
                 onPrepare(playWhenReady)
             } else serviceScope.launch {
-                val results = libraryBrowser.getSearchResults(query, extras)
-                if (results != null) {
-                    preparePlaylist(results, 0, playWhenReady)
-                } else setPlaybackError()
+                try {
+                    val results = libraryBrowser.getSearchResults(query, extras)
+                    if (results != null) {
+                        preparePlaylist(results, 0, playWhenReady)
+                    } else setPlaybackError()
+                } catch (err: Exception) {
+                    Timber.e(err)
+                }
             }
         }
 
