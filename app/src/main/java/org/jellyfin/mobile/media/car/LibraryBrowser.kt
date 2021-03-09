@@ -11,6 +11,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.media.MediaBrowserServiceCompat
 import org.jellyfin.apiclient.api.operations.*
+import org.jellyfin.apiclient.model.DeviceInfo
 import org.jellyfin.apiclient.model.api.*
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.R
@@ -388,8 +389,6 @@ class LibraryBrowser(
                 audioCodec = "aac",
                 // TODO missing: PlaySessionId=randomUUID()
                 enableRemoteMedia = true,
-                breakOnNonKeyFrames = false, // TODO new parameter
-                enableRedirection = true, // TODO new parameter
                 includeCredentials = true
             )
 

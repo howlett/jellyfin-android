@@ -189,7 +189,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 positionTicks = playbackPositionMillis * Constants.TICKS_PER_MILLISECOND,
                 volumeLevel = (currentVolume - volumeRange.first) * 100 / volumeRange.width,
                 repeatMode = RepeatMode.REPEAT_NONE,
-                playMethod = PlayMethod.DIRECT_PLAY, // TODO new parameter
+                playMethod = PlayMethod.DIRECT_PLAY, // mediaSource.playMethod is incompatible because it's a string
             ))
         }
     }
