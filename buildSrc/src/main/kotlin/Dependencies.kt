@@ -27,7 +27,7 @@ object Dependencies {
         const val room = "2.2.6"
 
         // Network
-        const val apiclient = "1.0.0-dev.1"
+        const val apiclient = "1.0.0-beta.2"
         const val okHttp = "4.9.1"
         const val coil = "1.1.1"
 
@@ -87,7 +87,7 @@ object Dependencies {
     }
 
     object Network {
-        const val apiclient = "org.jellyfin.apiclient:jellyfin-platform-android:${Versions.apiclient}"
+        const val jellyfinSdk = "org.jellyfin.sdk:jellyfin-platform-android:${Versions.apiclient}"
         const val okHttp = "com.squareup.okhttp3:okhttp:${Versions.okHttp}"
         const val coil = "io.coil-kt:coil-base:${Versions.coil}"
         val exoPlayerHLS = exoPlayer("hls")

@@ -20,8 +20,8 @@ import com.google.android.exoplayer2.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jellyfin.apiclient.api.operations.ImageApi
-import org.jellyfin.apiclient.model.api.ImageType
+import org.jellyfin.sdk.api.operations.ImageApi
+import org.jellyfin.sdk.model.api.ImageType
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.BuildConfig
 import org.jellyfin.mobile.MainActivity

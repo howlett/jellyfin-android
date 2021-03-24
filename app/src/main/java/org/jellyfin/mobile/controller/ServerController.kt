@@ -2,12 +2,12 @@ package org.jellyfin.mobile.controller
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jellyfin.apiclient.api.client.KtorClient
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.model.sql.dao.ServerDao
 import org.jellyfin.mobile.model.sql.dao.UserDao
 import org.jellyfin.mobile.model.sql.entity.ServerEntity
 import org.jellyfin.mobile.model.sql.entity.ServerUser
+import org.jellyfin.sdk.api.client.KtorClient
 import java.util.*
 
 class ServerController(

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.jellyfin.apiclient.api.client.ApiClient
+import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.mobile.controller.ServerController
 import org.jellyfin.mobile.model.sql.entity.ServerEntity
 

@@ -27,7 +27,6 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import kotlinx.coroutines.*
-import org.jellyfin.apiclient.api.client.KtorClient
 import org.jellyfin.mobile.R
 import org.jellyfin.mobile.cast.CastPlayerProvider
 import org.jellyfin.mobile.cast.ICastPlayerProvider
@@ -36,6 +35,7 @@ import org.jellyfin.mobile.media.car.LibraryBrowser
 import org.jellyfin.mobile.media.car.LibraryPage
 import org.jellyfin.mobile.model.sql.entity.ServerUser
 import org.jellyfin.mobile.utils.toast
+import org.jellyfin.sdk.api.client.KtorClient
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 import com.google.android.exoplayer2.MediaItem as ExoPlayerMediaItem

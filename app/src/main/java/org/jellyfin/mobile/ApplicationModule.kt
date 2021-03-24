@@ -3,9 +3,9 @@ package org.jellyfin.mobile
 import coil.ImageLoader
 import kotlinx.coroutines.channels.Channel
 import okhttp3.OkHttpClient
-import org.jellyfin.apiclient.Jellyfin
-import org.jellyfin.apiclient.android
-import org.jellyfin.apiclient.model.ClientInfo
+import org.jellyfin.sdk.Jellyfin
+import org.jellyfin.sdk.android
+import org.jellyfin.sdk.model.ClientInfo
 import org.jellyfin.mobile.controller.ServerController
 import org.jellyfin.mobile.fragment.ConnectFragment
 import org.jellyfin.mobile.fragment.WebViewFragment

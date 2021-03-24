@@ -16,11 +16,11 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.util.Clock
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import org.jellyfin.apiclient.api.operations.PlayStateApi
-import org.jellyfin.apiclient.model.api.PlayMethod
-import org.jellyfin.apiclient.model.api.PlaybackProgressInfo
-import org.jellyfin.apiclient.model.api.PlaybackStopInfo
-import org.jellyfin.apiclient.model.api.RepeatMode
+import org.jellyfin.sdk.api.operations.PlayStateApi
+import org.jellyfin.sdk.model.api.PlayMethod
+import org.jellyfin.sdk.model.api.PlaybackProgressInfo
+import org.jellyfin.sdk.model.api.PlaybackStopInfo
+import org.jellyfin.sdk.model.api.RepeatMode
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.BuildConfig
 import org.jellyfin.mobile.PLAYER_EVENT_CHANNEL

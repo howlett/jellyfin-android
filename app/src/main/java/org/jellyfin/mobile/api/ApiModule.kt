@@ -1,9 +1,9 @@
 package org.jellyfin.mobile.api
 
-import org.jellyfin.apiclient.Jellyfin
-import org.jellyfin.apiclient.api.client.ApiClient
-import org.jellyfin.apiclient.api.client.KtorClient
-import org.jellyfin.apiclient.api.operations.*
+import org.jellyfin.sdk.Jellyfin
+import org.jellyfin.sdk.api.client.ApiClient
+import org.jellyfin.sdk.api.client.KtorClient
+import org.jellyfin.sdk.api.operations.*
 import org.koin.dsl.binds
 import org.koin.dsl.module
 

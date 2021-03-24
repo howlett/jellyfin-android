@@ -10,9 +10,6 @@ import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import androidx.media.MediaBrowserServiceCompat
-import org.jellyfin.apiclient.api.operations.*
-import org.jellyfin.apiclient.model.DeviceInfo
-import org.jellyfin.apiclient.model.api.*
 import org.jellyfin.mobile.AppPreferences
 import org.jellyfin.mobile.R
 import org.jellyfin.mobile.media.*
@@ -21,6 +18,9 @@ import org.jellyfin.mobile.media.setAlbumArtUri
 import org.jellyfin.mobile.media.setAlbumArtist
 import org.jellyfin.mobile.media.setDisplayIconUri
 import org.jellyfin.mobile.media.setTrackNumber
+import org.jellyfin.sdk.api.operations.*
+import org.jellyfin.sdk.model.DeviceInfo
+import org.jellyfin.sdk.model.api.*
 import timber.log.Timber
 import java.util.*
 

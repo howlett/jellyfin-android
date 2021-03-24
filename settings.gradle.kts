@@ -22,12 +22,12 @@ val properties = Properties().apply {
 // Get value for dependency substitution
 val enableDependencySubstitution = properties.getProperty("enable.dependency.substitution", "true").equals("true", true)
 
-// Replace apiclient dependency with local version
-val apiclientLocation = "../jellyfin-apiclient-java"
+// Replace SDK dependency with local version
+val apiclientLocation = "../jellyfin-sdk-kotlin"
 if (File(apiclientLocation).exists() && enableDependencySubstitution) {
     includeBuild(apiclientLocation) {
         dependencySubstitution {
-            substitute(module("org.jellyfin.apiclient:jellyfin-platform-android")).with(project(":jellyfin-platform-android"))
+            substitute(module("org.jellyfin.sdk:jellyfin-platform-android")).with(project(":jellyfin-platform-android"))
         }
     }
 }
